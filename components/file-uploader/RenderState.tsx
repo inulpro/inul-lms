@@ -1,4 +1,5 @@
-import { CloudUploadIcon, ImageIcon } from "lucide-react";
+import Image from "next/image";
+import { CloudUploadIcon, ImageIcon, XIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
@@ -38,6 +39,44 @@ export function RenderErrorState() {
       <Button className="mt-2" type="button">
         Retry Select File
       </Button>
+    </div>
+  );
+}
+
+export function RenderUploadedState({ previewUrl }: { previewUrl: string }) {
+  return (
+    <div>
+      <Image
+        src={previewUrl}
+        alt="Uploaded File"
+        fill
+        className="object-contain p-2"
+      />
+      <Button
+        variant="destructive"
+        size="icon"
+        className={cn("absolute top-4 right-4")}
+      >
+        <XIcon className="size-4" />
+      </Button>
+    </div>
+  );
+}
+
+export function RenderUploadingState({
+  progress,
+  file,
+}: {
+  progress: number;
+  file: File;
+}) {
+  return (
+    <div className="text-center flex justify-center items-center flex-col">
+      <p>{progress}% completed</p>
+      <p className="mt-2 text-sm font-medium text-foreground">Uploading...</p>
+      <p className="mt-1 text-xs text-muted-foreground truncate max-w-xs">
+        {file.name}
+      </p>
     </div>
   );
 }

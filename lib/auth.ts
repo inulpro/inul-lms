@@ -1,3 +1,4 @@
+import "server-only";
 import nodemailer from "nodemailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 import { betterAuth } from "better-auth";
