@@ -2,9 +2,13 @@ import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
 import { requireAdmin } from "@/app/data/admin/require-admin";
+import { adminGetCourses } from "@/app/data/admin/admin-get-courses";
+
+import { AdminCourseCard } from "./_components/AdminCourseCard";
 
 export default async function CoursesPage() {
   await requireAdmin();
+  const data = await adminGetCourses();
 
   return (
     <>
@@ -15,8 +19,10 @@ export default async function CoursesPage() {
         </Link>
       </div>
 
-      <div>
-        <h1>Here you will see all of the courses</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-7">
+        {data.map((course) => (
+          <AdminCourseCard key={course.id} data={course} />
+        ))}
       </div>
     </>
   );

@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        port: "",
+        protocol: "https",
+        hostname: "inul-lms-video-subscribe.fly.storage.tigris.dev",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
