@@ -1,9 +1,9 @@
-import "server-only";
 import nodemailer from "nodemailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 import { betterAuth } from "better-auth";
 import { emailOTP } from "better-auth/plugins";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { admin } from "better-auth/plugins";
 
 import { env } from "./env";
 import { prisma } from "./db";
@@ -60,12 +60,12 @@ export const auth = betterAuth({
         try {
           await transporter.sendMail(mailOptions);
           console.log("OTP email sent to", email);
-          // Removed return true to match expected Promise<void> return type
         } catch (error) {
           console.error("Error sending OTP email:", error);
           throw new Error("Failed to send OTP email");
         }
       },
     }),
+    admin(),
   ],
 });
