@@ -3,37 +3,7 @@
  * @param key - S3 object key
  * @returns Public URL to access the S3 object
  */
-export async function getS3PublicUrl(key: string): Promise<string> {
-  if (!key) return "";
-
-  try {
-    const response = await fetch("/api/s3/url", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ key }),
-    });
-
-    if (!response.ok) {
-      console.error("Failed to get S3 URL from API");
-      return "";
-    }
-
-    const { url } = await response.json();
-    return url;
-  } catch (error) {
-    console.error("Error getting S3 URL:", error);
-    return "";
-  }
-}
-
-/**
- * Generate public S3 URL from key (synchronous fallback)
- * @param key - S3 object key
- * @returns Public URL to access the S3 object
- */
-export function getS3PublicUrlSync(key: string): string {
+export function getS3PublicUrl(key: string): string {
   if (!key) return "";
 
   // Remove any leading slashes
@@ -47,9 +17,8 @@ export function getS3PublicUrlSync(key: string): string {
     return "";
   }
 
-  // For now, assume AWS S3 format. You can customize this based on your setup
-  // If you're using a different S3 provider, you'll need to adjust this
-  return `https://${bucketName}.s3.amazonaws.com/${cleanKey}`;
+  // Use Tigris storage format consistently
+  return `https://${bucketName}.fly.storage.tigris.dev/${cleanKey}`;
 }
 
 /**

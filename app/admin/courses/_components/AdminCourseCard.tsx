@@ -10,7 +10,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 
-import { useConstructUrl } from "@/hooks/use-construct";
+import { getS3PublicUrl } from "@/lib/s3-utils";
 import { AdminCourseType } from "@/app/data/admin/admin-get-courses";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,7 +28,7 @@ interface iAppProps {
 }
 
 export function AdminCourseCard({ data }: iAppProps) {
-  const thumbnailUrl = useConstructUrl(data.fileKey);
+  const thumbnailUrl = getS3PublicUrl(data.fileKey);
 
   return (
     <Card className="group relative py-0 gap-0 transition-transform duration-300 ease-in-out">

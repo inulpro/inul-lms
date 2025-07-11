@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { FileRejection, useDropzone } from "react-dropzone";
 
 import { cn } from "@/lib/utils";
-import { getS3PublicUrlSync, isS3Key } from "@/lib/s3-utils";
+import { getS3PublicUrl, isS3Key } from "@/lib/s3-utils";
 
 import { Card, CardContent } from "../ui/card";
 import {
@@ -43,6 +43,7 @@ export function Uploader({ value, onChange }: iAppProps) {
     isDeleting: false,
     fileType: "image",
     key: value,
+    objectUrl: undefined, // Don't set initial objectUrl, let useEffect handle it
   });
 
   async function uploadFile(file: File) {
@@ -255,7 +256,7 @@ export function Uploader({ value, onChange }: iAppProps) {
         previewUrl = fileState.objectUrl;
       } else if (fileState.key) {
         previewUrl = isS3Key(fileState.key)
-          ? getS3PublicUrlSync(fileState.key)
+          ? getS3PublicUrl(fileState.key)
           : fileState.key;
       }
 
