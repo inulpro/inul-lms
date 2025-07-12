@@ -9,7 +9,6 @@ import {
   ChevronRight,
   FileTextIcon,
   GripVertical,
-  Trash2Icon,
 } from "lucide-react";
 import {
   DndContext,
@@ -39,8 +38,11 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
+import { DeleteLesson } from "./DeleteLesson";
+import { DeleteChapter } from "./DeleteChapter";
 import { NewLessonModal } from "./NewLessonModal";
 import { NewChapterModal } from "./NewChapterModal";
+
 import { ReorderChapters, ReorderLessons } from "../actions";
 
 interface iAppProps {
@@ -345,9 +347,7 @@ export function CourseStructure({ data }: iAppProps) {
                             {item.title}
                           </p>
                         </div>
-                        <Button size="icon" variant="outline">
-                          <Trash2Icon className="size-4" />
-                        </Button>
+                        <DeleteChapter chapterId={item.id} courseId={data.id} />
                       </div>
 
                       <CollapsibleContent>
@@ -380,10 +380,11 @@ export function CourseStructure({ data }: iAppProps) {
                                         {lesson.title}
                                       </Link>
                                     </div>
-
-                                    <Button size="icon" variant="outline">
-                                      <Trash2Icon className="size-4" />
-                                    </Button>
+                                    <DeleteLesson
+                                      lessonId={lesson.id}
+                                      chapterId={item.id}
+                                      courseId={data.id}
+                                    />
                                   </div>
                                 )}
                               </SortableItem>
