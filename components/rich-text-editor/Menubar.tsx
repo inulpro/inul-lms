@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { type Editor } from "@tiptap/react";
 import { Redo2Icon, Undo2Icon } from "lucide-react";
 import {
@@ -12,21 +13,42 @@ import {
   IconList,
   IconListNumbers,
   IconStrikethrough,
+  IconCode,
+  IconPhoto,
+  IconLink,
+  IconTable,
 } from "@tabler/icons-react";
 
-import { TooltipProvider } from "../ui/tooltip";
 import { Button } from "../ui/button";
+import { TooltipProvider } from "../ui/tooltip";
 
 import { MenuButton } from "./MenuButton";
+import { LinkDialog } from "./LinkDialog";
+import { ImageUploadDialog } from "./ImageUploadDialog";
 
 interface iAppProps {
   editor: Editor | null;
 }
 
 export function Menubar({ editor }: iAppProps) {
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+
   if (!editor) {
     return null;
   }
+
+  const handleImageInsert = (src: string, alt?: string) => {
+    editor.chain().focus().setImage({ src, alt }).run();
+  };
+
+  const insertTable = () => {
+    editor
+      .chain()
+      .focus()
+      .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+      .run();
+  };
 
   const menuItems = [
     {
@@ -77,6 +99,33 @@ export function Menubar({ editor }: iAppProps) {
       tooltip: "Ordered List",
       children: <IconListNumbers />,
     },
+    {
+      action: () => editor.chain().focus().toggleCodeBlock().run(),
+      isActive: editor.isActive("codeBlock"),
+      tooltip: "Code Block",
+      children: <IconCode />,
+    },
+  ];
+
+  const mediaItems = [
+    {
+      action: () => setLinkDialogOpen(true),
+      isActive: editor.isActive("link"),
+      tooltip: "Add Link",
+      children: <IconLink />,
+    },
+    {
+      action: () => setImageDialogOpen(true),
+      isActive: false,
+      tooltip: "Add Image",
+      children: <IconPhoto />,
+    },
+    {
+      action: insertTable,
+      isActive: editor.isActive("table"),
+      tooltip: "Insert Table",
+      children: <IconTable />,
+    },
   ];
 
   const textAlignItems = [
@@ -118,6 +167,13 @@ export function Menubar({ editor }: iAppProps) {
 
         <div className="w-px h-6 bg-border mx-2"></div>
         <div className="flex flex-wrap gap-1">
+          {mediaItems.map((item, index) => (
+            <MenuButton key={index} {...item} />
+          ))}
+        </div>
+
+        <div className="w-px h-6 bg-border mx-2"></div>
+        <div className="flex flex-wrap gap-1">
           <Button
             size="sm"
             variant="ghost"
@@ -138,6 +194,18 @@ export function Menubar({ editor }: iAppProps) {
           </Button>
         </div>
       </TooltipProvider>
+
+      <ImageUploadDialog
+        open={imageDialogOpen}
+        onOpenChange={setImageDialogOpen}
+        onImageInsert={handleImageInsert}
+      />
+
+      <LinkDialog
+        open={linkDialogOpen}
+        onOpenChange={setLinkDialogOpen}
+        editor={editor}
+      />
     </div>
   );
 }
