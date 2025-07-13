@@ -17,7 +17,12 @@ import { Menubar } from "./Menubar";
 
 const lowlight = createLowlight(common);
 
-export function RichTextEditor({ field }: { field: any }) {
+interface FieldProps {
+  onChange: (value: string) => void;
+  value: string;
+}
+
+export function RichTextEditor({ field }: { field: FieldProps }) {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -44,7 +49,8 @@ export function RichTextEditor({ field }: { field: any }) {
       CodeBlockLowlight.configure({
         lowlight,
         HTMLAttributes: {
-          class: "bg-muted p-4 rounded-lg font-mono text-sm overflow-x-auto",
+          class:
+            "bg-muted text-muted-foreground p-4 rounded-lg font-mono text-sm overflow-x-auto",
         },
       }),
       Table.configure({
