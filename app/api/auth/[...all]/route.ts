@@ -1,7 +1,8 @@
+import ip from "@arcjet/ip";
 import arcjet from "@/lib/arcjet";
 import { auth } from "@/lib/auth";
-
-import ip from "@arcjet/ip";
+import { NextRequest } from "next/server";
+import { toNextJsHandler } from "better-auth/next-js";
 import {
   type ArcjetDecision,
   type BotOptions,
@@ -12,26 +13,24 @@ import {
   protectSignup,
   slidingWindow,
 } from "@arcjet/next";
-import { toNextJsHandler } from "better-auth/next-js";
-import { NextRequest } from "next/server";
 
 const emailOptions = {
-  mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+  mode: process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN",
   // Block emails that are disposable, invalid, or have no MX records
   block: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"],
 } satisfies EmailOptions;
 
 const botOptions = {
-  mode: "LIVE",
+  mode: process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN",
   // configured with a list of bots to allow from
   // https://arcjet.com/bot-list
   allow: [], // prevents bots from submitting the form
 } satisfies BotOptions;
 
 const rateLimitOptions = {
-  mode: "LIVE",
+  mode: process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN",
   interval: "2m", // counts requests over a 2 minute sliding window
-  max: 5, // allows 5 submissions within the window
+  max: 10, // Lebih longgar untuk auth
 } satisfies SlidingWindowRateLimitOptions<[]>;
 
 const signupOptions = {

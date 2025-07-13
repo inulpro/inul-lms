@@ -4,17 +4,10 @@ import { request } from "@arcjet/next";
 
 import { prisma } from "@/lib/db";
 import { ApiResponse } from "@/lib/types";
-import arcjet, { fixedWindow } from "@/lib/arcjet";
+import { adminArcjet } from "@/lib/arcjet";
 import { requireAdmin } from "@/app/data/admin/require-admin";
 import { courseSchema, CourseSchemaType } from "@/lib/zodSchema";
-
-const aj = arcjet.withRule(
-  fixedWindow({
-    mode: "LIVE",
-    window: "1m",
-    max: 5,
-  })
-);
+import { handleArcjetDecision, logArcjetDecision } from "@/lib/arcjet-utils";
 
 export async function CreateCourse(
   values: CourseSchemaType
@@ -23,14 +16,15 @@ export async function CreateCourse(
 
   try {
     const req = await request();
-    const decision = await aj.protect(req, { fingerprint: session.user.id });
+    const decision = await adminArcjet.protect(req, {
+      fingerprint: session.user.id,
+    });
 
-    if (decision.isDenied()) {
-      if (decision.reason.isRateLimit()) {
-        return { status: "error", message: "You have been rate limited." };
-      } else {
-        return { status: "error", message: "Looks like you are a bot." };
-      }
+    logArcjetDecision(decision, "Create Course");
+
+    const arcjetError = handleArcjetDecision(decision);
+    if (arcjetError) {
+      return arcjetError;
     }
 
     const validation = courseSchema.safeParse(values);
@@ -45,7 +39,7 @@ export async function CreateCourse(
     await prisma.course.create({
       data: {
         ...validation.data,
-        userId: session?.user.id as string,
+        userId: session.user.id,
       },
     });
 

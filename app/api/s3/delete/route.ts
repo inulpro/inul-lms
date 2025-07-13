@@ -3,27 +3,23 @@ import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 
 import { env } from "@/lib/env";
 import { S3 } from "@/lib/S3Client";
-import arcjet, { fixedWindow } from "@/lib/arcjet";
+import { uploadArcjet } from "@/lib/arcjet";
 import { requireAdmin } from "@/app/data/admin/require-admin";
-
-const aj = arcjet.withRule(
-  fixedWindow({
-    mode: "LIVE",
-    window: "1m",
-    max: 5,
-  })
-);
+import { handleArcjetDecision, logArcjetDecision } from "@/lib/arcjet-utils";
 
 export async function DELETE(request: Request) {
   const session = await requireAdmin();
 
   try {
-    const decision = await aj.protect(request, {
-      fingerprint: session?.user.id as string,
+    const decision = await uploadArcjet.protect(request, {
+      fingerprint: session.user.id,
     });
 
-    if (decision.isDenied()) {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    logArcjetDecision(decision, "S3 Delete");
+
+    const arcjetError = handleArcjetDecision(decision);
+    if (arcjetError) {
+      return NextResponse.json({ error: arcjetError.message }, { status: 429 });
     }
 
     const body = await request.json();
