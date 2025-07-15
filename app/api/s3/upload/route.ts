@@ -3,26 +3,39 @@ import { NextResponse } from "next/server";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
+import { requireAdmin } from "@/app/data/admin/require-admin";
+
 import { env } from "@/lib/env";
 import { S3 } from "@/lib/S3Client";
 import { uploadArcjet } from "@/lib/arcjet";
 import { fileUploadSchema } from "@/lib/zodSchema";
-import { requireAdmin } from "@/app/data/admin/require-admin";
-import { handleArcjetDecision, logArcjetDecision } from "@/lib/arcjet-utils";
+import {
+  handleArcjetDecision,
+  protectWithErrorHandling,
+} from "@/lib/arcjet-utils";
 
 export async function POST(request: Request) {
   const session = await requireAdmin();
 
   try {
-    const decision = await uploadArcjet.protect(request, {
-      fingerprint: session.user.id,
-    });
+    const { decision, error } = await protectWithErrorHandling(
+      uploadArcjet,
+      request,
+      { fingerprint: session.user.id },
+      "S3 Upload"
+    );
 
-    logArcjetDecision(decision, "S3 Upload");
-
-    const arcjetError = handleArcjetDecision(decision);
-    if (arcjetError) {
-      return NextResponse.json({ error: arcjetError.message }, { status: 429 });
+    // Jika ada error timeout/network, lanjutkan request (fail-open)
+    if (error) {
+      console.warn(`[S3 Upload] Arcjet ${error} - proceeding with upload`);
+    } else if (decision) {
+      const arcjetError = handleArcjetDecision(decision);
+      if (arcjetError) {
+        return NextResponse.json(
+          { error: arcjetError.message },
+          { status: 429 }
+        );
+      }
     }
 
     const body = await request.json();

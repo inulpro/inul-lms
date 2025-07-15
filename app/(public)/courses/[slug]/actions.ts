@@ -4,19 +4,20 @@ import Stripe from "stripe";
 import { request } from "@arcjet/next";
 import { redirect } from "next/navigation";
 
+import { requireUser } from "@/app/data/user/require-user";
+
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 import { ApiResponse } from "@/lib/types";
 import arcjet, { fixedWindow } from "@/lib/arcjet";
-
-import { requireUser } from "@/app/data/user/require-user";
+import { getArcjetMode, RATE_LIMITS } from "@/lib/arcjet-config";
 
 const aj = arcjet.withRule(
   fixedWindow({
-    mode: process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN",
-    window: "1m",
-    max: 3,
+    mode: getArcjetMode(),
+    window: RATE_LIMITS.enrollment.window,
+    max: RATE_LIMITS.enrollment.max,
   })
 );
 

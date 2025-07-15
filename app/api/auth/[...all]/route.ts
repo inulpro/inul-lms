@@ -1,6 +1,3 @@
-import ip from "@arcjet/ip";
-import arcjet from "@/lib/arcjet";
-import { auth } from "@/lib/auth";
 import { NextRequest } from "next/server";
 import { toNextJsHandler } from "better-auth/next-js";
 import {
@@ -14,23 +11,28 @@ import {
   slidingWindow,
 } from "@arcjet/next";
 
+import arcjet from "@/lib/arcjet";
+import { auth } from "@/lib/auth";
+import { getClientIP } from "@/lib/arcjet-utils";
+import { getArcjetMode, RATE_LIMITS, EMAIL_CONFIG } from "@/lib/arcjet-config";
+
 const emailOptions = {
-  mode: process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN",
+  mode: getArcjetMode(),
   // Block emails that are disposable, invalid, or have no MX records
-  block: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"],
+  block: [...EMAIL_CONFIG.blockedTypes],
 } satisfies EmailOptions;
 
 const botOptions = {
-  mode: process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN",
+  mode: getArcjetMode(),
   // configured with a list of bots to allow from
   // https://arcjet.com/bot-list
-  allow: [], // prevents bots from submitting the form
+  allow: [] as const, // prevents bots from submitting the form
 } satisfies BotOptions;
 
 const rateLimitOptions = {
-  mode: process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN",
-  interval: "2m", // counts requests over a 2 minute sliding window
-  max: 10, // Lebih longgar untuk auth
+  mode: getArcjetMode(),
+  interval: RATE_LIMITS.auth.window, // counts requests over a 5 minute sliding window (lebih longgar)
+  max: RATE_LIMITS.auth.max, // Lebih longgar untuk auth (dari 10 ke 15)
 } satisfies SlidingWindowRateLimitOptions<[]>;
 
 const signupOptions = {
@@ -54,7 +56,7 @@ async function protect(req: NextRequest): Promise<ArcjetDecision> {
   if (session?.user.id) {
     userId = session.user.id;
   } else {
-    userId = ip(req) || "127.0.0.1"; // Fall back to local IP if none
+    userId = getClientIP(req); // Gunakan utility function yang lebih baik
   }
 
   // If this is a signup then use the special protectSignup rule

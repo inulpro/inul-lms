@@ -10,6 +10,7 @@ import arcjet, {
 } from "@arcjet/next";
 
 import { env } from "./env";
+import { getArcjetMode, RATE_LIMITS } from "./arcjet-config";
 
 export {
   detectBot,
@@ -26,7 +27,7 @@ export default arcjet({
   characteristics: ["fingerprint"],
   rules: [
     shield({
-      mode: process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN",
+      mode: getArcjetMode(),
     }),
   ],
 });
@@ -37,12 +38,12 @@ export const adminArcjet = arcjet({
   characteristics: ["fingerprint"],
   rules: [
     shield({
-      mode: process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN",
+      mode: getArcjetMode(),
     }),
     fixedWindow({
-      mode: process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN",
-      window: "1m",
-      max: 10, // Lebih longgar untuk admin
+      mode: getArcjetMode(),
+      window: RATE_LIMITS.admin.window,
+      max: RATE_LIMITS.admin.max,
     }),
   ],
 });
@@ -53,12 +54,12 @@ export const uploadArcjet = arcjet({
   characteristics: ["fingerprint"],
   rules: [
     shield({
-      mode: process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN",
+      mode: getArcjetMode(),
     }),
     fixedWindow({
-      mode: process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN",
-      window: "5m",
-      max: 3, // Lebih ketat untuk upload
+      mode: getArcjetMode(),
+      window: RATE_LIMITS.upload.window,
+      max: RATE_LIMITS.upload.max,
     }),
   ],
 });

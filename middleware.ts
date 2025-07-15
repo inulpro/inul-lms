@@ -3,19 +3,15 @@ import { NextRequest, NextResponse } from "next/server";
 import arcjet, { createMiddleware, detectBot } from "@arcjet/next";
 
 import { env } from "./lib/env";
+import { getArcjetMode, BOT_CONFIG } from "./lib/arcjet-config";
 
 const aj = arcjet({
   key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
   rules: [
     detectBot({
-      mode: process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN",
+      mode: getArcjetMode(),
       // Block all bots except the following
-      allow: [
-        "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc
-        "CATEGORY:MONITOR", // Uptime monitoring services
-        "CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord
-        "STRIPE_WEBHOOK", // Stripe webhook
-      ],
+      allow: [...BOT_CONFIG.allowedCategories],
     }),
   ],
 });
