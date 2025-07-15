@@ -1,4 +1,5 @@
 import "server-only";
+
 import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/db";

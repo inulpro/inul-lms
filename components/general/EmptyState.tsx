@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { BanIcon } from "lucide-react";
 
-import { buttonVariants } from "../ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 interface iAppProps {
   title: string;

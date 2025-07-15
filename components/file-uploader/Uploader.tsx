@@ -297,7 +297,7 @@ export function Uploader({ value, onChange, fileTypeAccepted }: iAppProps) {
         URL.revokeObjectURL(fileState.objectUrl);
       }
     };
-  }, []);
+  }, [fileState.objectUrl]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

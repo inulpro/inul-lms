@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 
 import { requireAdmin } from "./require-admin";
 
-export async function adminGetCourses() {
+export async function adminGetRecentCourses() {
   await requireAdmin();
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -12,6 +12,7 @@ export async function adminGetCourses() {
     orderBy: {
       createdAt: "desc",
     },
+    take: 2,
     select: {
       id: true,
       title: true,
@@ -27,5 +28,3 @@ export async function adminGetCourses() {
 
   return data;
 }
-
-export type AdminCourseType = Awaited<ReturnType<typeof adminGetCourses>>[0];
