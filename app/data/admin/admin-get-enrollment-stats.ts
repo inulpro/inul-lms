@@ -35,8 +35,8 @@ export async function adminGetEnrollmentStats() {
     });
   }
 
-  enrollments.forEach((enrollment) => {
-    const enrollmentDate = enrollment.createdAt.toISOString().split("T")[0];
+  enrollments.forEach((enrollments) => {
+    const enrollmentDate = enrollments.createdAt.toISOString().split("T")[0];
     const dayIndex = last30Days.findIndex((day) => day.date === enrollmentDate);
 
     if (dayIndex !== -1) {

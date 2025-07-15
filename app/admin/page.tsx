@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { Suspense } from "react";
-import { BanIcon, Link, PlusIcon } from "lucide-react";
+import { BanIcon, PlusIcon } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/general/EmptyState";

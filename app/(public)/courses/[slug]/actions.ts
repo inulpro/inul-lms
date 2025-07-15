@@ -23,29 +23,30 @@ const aj = arcjet.withRule(
 export async function enrollInCourseAction(
   courseId: string
 ): Promise<ApiResponse | never> {
-  const user = await requireUser();
+  const sessionUser = await requireUser();
 
   let checkoutUrl: string;
 
   try {
     const req = await request();
     const decision = await aj.protect(req, {
-      fingerprint: user.id,
+      fingerprint: sessionUser.id,
     });
 
     if (decision.isDenied()) {
       return { status: "error", message: "You have been blocked" };
     }
 
+    // Get course
     const course = await prisma.course.findUnique({
       where: {
         id: courseId,
+        status: "Published",
       },
       select: {
         id: true,
-        title: true,
         price: true,
-        slug: true,
+        stripePriceId: true,
       },
     });
 
@@ -53,19 +54,27 @@ export async function enrollInCourseAction(
       return { status: "error", message: "Course not found" };
     }
 
-    let stripeCustomerId: string;
-    const userWithStripeCustomerId = await prisma.user.findUnique({
+    // Get user with stripeCustomerId
+    const user = await prisma.user.findUnique({
       where: {
-        id: user.id,
+        id: sessionUser.id,
       },
       select: {
+        id: true,
+        email: true,
+        name: true,
         stripeCustomerId: true,
       },
     });
 
-    if (userWithStripeCustomerId?.stripeCustomerId) {
-      stripeCustomerId = userWithStripeCustomerId.stripeCustomerId;
-    } else {
+    if (!user) {
+      return { status: "error", message: "User not found" };
+    }
+
+    // Get or create Stripe customer
+    let stripeCustomerId = user.stripeCustomerId;
+
+    if (!stripeCustomerId) {
       const customer = await stripe.customers.create({
         email: user.email,
         name: user.name,
@@ -117,7 +126,6 @@ export async function enrollInCourseAction(
           data: {
             amount: course.price,
             status: "Pending",
-            updatedAt: new Date(),
           },
         });
       } else {
@@ -135,7 +143,7 @@ export async function enrollInCourseAction(
         customer: stripeCustomerId,
         line_items: [
           {
-            price: "price_1RkoGLC5ZUgnNGUXc5fKYS9y",
+            price: course.stripePriceId,
             quantity: 1,
           },
         ],
