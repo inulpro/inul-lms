@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/collapsible";
 
 import { EnrollmentButton } from "./_components/EnrollmentButton";
+import { buttonVariants } from "@/components/ui/button";
 
 type Params = Promise<{ slug: string }>;
 
@@ -267,7 +268,12 @@ export default async function SlugPage({ params }: { params: Params }) {
               </div>
 
               {isEnrolled ? (
-                <Link href="/dashboard">Watch Course</Link>
+                <Link
+                  className={buttonVariants({ className: "w-full" })}
+                  href="/dashboard"
+                >
+                  Watch Course
+                </Link>
               ) : (
                 <EnrollmentButton courseId={course.id} />
               )}
